@@ -64,7 +64,7 @@ const TicTacToe = () => {
     <div className="flex flex-col items-center justify-center h-screen bg-[#232C46]">
       <h1 className="text-[24px] text-[white] font-bold mb-4">Tic Tac Toe</h1>
 
-      <div className="mt-4 flex gap-4">
+      <div className="mt-6 mb-6 flex gap-4">
         <p className="border py-[12px] px-[28px] text-lg text-[white] items-center font-bold flex flex-col rounded-xl">
           X
           <span className="mt-2 text-[14px] text-center">You: {xWins}</span>
@@ -76,7 +76,7 @@ const TicTacToe = () => {
       </div>
 
       {winner && (
-        <p className="text-lg font-bold text-[white] mt-6 mb-6">Player {winner} wins!</p>
+        <p className="text-lg font-bold text-[white] mb-6">Player {winner} wins!</p>
       )}
 
       <div>
