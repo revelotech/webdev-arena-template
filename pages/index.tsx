@@ -1,22 +1,13 @@
 import { useState } from "react";
-
-const schema = {
-  commentary: "This code generates a Tic Tac Toe game with a 3x3 grid, allowing two players to take turns and showing the winner.",
-  template: "nextjs-developer",
-  title: "Tic Tac Toe",
-  description: "A simple Tic Tac Toe game for two players.",
-  additional_dependencies: [],
-  has_additional_dependencies: false,
-  install_dependencies_command: "",
-  port: 3000,
-  file_path: "pages/index.tsx",
-  code: ""
-}
+import { Button } from "@/components/ui/button";
+import { RxReset } from "react-icons/rx";
 
 const TicTacToe = () => {
   const [board, setBoard] = useState<string[][]>([["", "", ""], ["", "", ""], ["", "", ""]]);
   const [turn, setTurn] = useState<string>("X");
   const [winner, setWinner] = useState<string | null>(null);
+  const [xWins, setXWins] = useState<number>(0);
+  const [oWins, setOWins] = useState<number>(0);
 
   const handleMove = (row: number, col: number) => {
     if (winner || board[row][col] !== "") return;
@@ -24,23 +15,43 @@ const TicTacToe = () => {
     newBoard[row][col] = turn;
     setBoard(newBoard);
 
-    checkWinner();
+    checkWinner(newBoard);
 
     setTurn(turn === "X" ? "O" : "X");
   };
 
-  const checkWinner = () => {
+  const checkWinner = (newBoard: string[][]) => {
     for (let i = 0; i < 3; i++) {
-      if (board[i][0] === board[i][1] && board[i][1] === board[i][2] && board[i][0] !== "")
-        setWinner(board[i][0]);
-      if (board[0][i] === board[1][i] && board[1][i] === board[2][i] && board[0][i] !== "")
-        setWinner(board[0][i]);
+      if (newBoard[i][0] === newBoard[i][1] && newBoard[i][1] === newBoard[i][2] && newBoard[i][0] !== "") {
+        setWinner(newBoard[i][0]);
+        updateWins(newBoard[i][0]);
+        return;
+      }
+      if (newBoard[0][i] === newBoard[1][i] && newBoard[1][i] === newBoard[2][i] && newBoard[0][i] !== "") {
+        setWinner(newBoard[0][i]);
+        updateWins(newBoard[0][i]);
+        return;
+      }
     }
 
-    if (board[0][0] === board[1][1] && board[1][1] === board[2][2] && board[0][0] !== "")
-      setWinner(board[0][0]);
-    if (board[0][2] === board[1][1] && board[1][1] === board[2][0] && board[0][2] !== "")
-      setWinner(board[0][2]);
+    if (newBoard[0][0] === newBoard[1][1] && newBoard[1][1] === newBoard[2][2] && newBoard[0][0] !== "") {
+      setWinner(newBoard[0][0]);
+      updateWins(newBoard[0][0]);
+      return;
+    }
+    if (newBoard[0][2] === newBoard[1][1] && newBoard[1][1] === newBoard[2][0] && newBoard[0][2] !== "") {
+      setWinner(newBoard[0][2]);
+      updateWins(newBoard[0][2]);
+      return;
+    }
+  };
+
+  const updateWins = (winner: string) => {
+    if (winner === "X") {
+      setXWins(xWins + 1);
+    } else if (winner === "O") {
+      setOWins(oWins + 1);
+    }
   };
 
   const resetGame = () => {
@@ -50,28 +61,47 @@ const TicTacToe = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-3xl font-bold mb-4">Tic Tac Toe</h1>
-      {winner && (
-        <p className="text-lg font-bold mb-4">Player {winner} wins!</p>
-      )}
-      <div className="grid grid-cols-3 gap-4">
-        {board.map((row, rowIndex) => row.map((cell, colIndex) => (
-          <div
-            key={`${rowIndex}-${colIndex}`}
-            className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16 flex justify-center items-center cursor-pointer"
-            onClick={() => handleMove(rowIndex, colIndex)}
-          >
-            {cell}
-          </div>
-        )))}
+    <div className="flex flex-col items-center justify-center h-screen bg-[#232C46]">
+      <h1 className="text-[24px] text-[white] font-bold mb-4">Tic Tac Toe</h1>
+
+      <div className="mt-4 flex gap-4">
+        <p className="border py-[12px] px-[28px] text-lg text-[white] items-center font-bold flex flex-col rounded-xl">
+          X
+          <span className="mt-2 text-[14px] text-center">You: {xWins}</span>
+        </p>
+        <p className="border py-[12px] px-[28px] text-lg items-center text-[white] font-bold flex flex-col rounded-xl">
+          O
+          <span className="mt-2 text-[14px] text-center">Bot: {xWins}</span>
+        </p>
       </div>
-      <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-        onClick={resetGame}
-      >
-        Reset Game
-      </button>
+
+      {winner && (
+        <p className="text-lg font-bold text-[white] mt-6 mb-6">Player {winner} wins!</p>
+      )}
+
+      <div>
+        <div className="grid grid-cols-3 gap-4 bg-[#3E4F6B] p-4 rounded-xl">
+          {board.map((row, rowIndex) => row.map((cell, colIndex) => (
+            <div
+              key={`${rowIndex}-${colIndex}`}
+              className="bg-[#232C46] text-[white] font-semibold rounded-xl w-16 h-16 flex justify-center items-center cursor-pointer"
+              onClick={() => handleMove(rowIndex, colIndex)}
+            >
+              {cell}
+            </div>
+          )))}
+        </div>
+
+        <Button
+          className="mt-8 w-full"
+          variant="secondary"
+          onClick={resetGame}
+        >
+          <RxReset />
+
+          Reset Game
+        </Button>
+      </div>
     </div>
   );
 };
