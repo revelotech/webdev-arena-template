@@ -1,115 +1,139 @@
-import Image from "next/image";
-import localFont from "next/font/local";
+import { useState, useEffect } from 'react';
+import { IoMdCopy, IoIosShuffle } from "react-icons/io";
+import { IoSaveOutline, IoTrashOutline } from "react-icons/io5";
+import { IconContext } from "react-icons";
+import { Button } from '@/components/ui/button';
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+const ColorPaletteGenerator: React.FC = () => {
+  const [colors, setColors] = useState<string[]>(["#FFFFFF", "#000000", "#808080"]);
+  const [favoritePalettes, setFavoritePalettes] = useState<string[][]>([]);
 
-export default function Home() {
+  useEffect(() => {
+    const storedPalettes = localStorage.getItem("favoritePalettes");
+    if (storedPalettes) {
+      try {
+        const parsedPalettes: string[][] = JSON.parse(storedPalettes);
+        if (Array.isArray(parsedPalettes)) {
+          setFavoritePalettes(parsedPalettes);
+        }
+      } catch (error) {
+        console.error("Error parsing favorite palettes:", error);
+      }
+    }
+  }, []);
+
+  const generateRandomColors = () => {
+    const newColors: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+      newColors.push(randomColor);
+    }
+    setColors(newColors);
+  };
+
+  const copyColor = (color: string) => {
+    navigator.clipboard.writeText(color)
+  };
+
+  const savePalette = () => {
+    const newFavoritePalettes = [...favoritePalettes, colors];
+    setFavoritePalettes(newFavoritePalettes);
+    localStorage.setItem("favoritePalettes", JSON.stringify(newFavoritePalettes));
+  };
+
+  const removePalette = (palette: string[]) => {
+    const newFavoritePalettes = favoritePalettes.filter((p) => p.join("") !== palette.join(""));
+    setFavoritePalettes(newFavoritePalettes);
+    localStorage.setItem("favoritePalettes", JSON.stringify(newFavoritePalettes));
+  };
+
   return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              pages/index.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <section className="min-h-screen bg-[#F8FAFA] p-4 rounded-2xl">
+      <div className="content-center p-4">
+        <header>
+          <h1 className="text-3xl mb-4 font-semibold">Color Palette Generator</h1>
+        </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <div className="flex flex-wrap flex-col bg-white p-4 rounded-lg">
+          <h2 className="text-2xl mb-4 font-semibold">
+            New Palette
+          </h2>
+
+          <div className="flex flex-wrap gap-4 mb-4 rounded-lg flex items-center">
+            {colors.map((color, index) => (
+              <div key={index} className="w-[240px] h-[175px] p-2 border border-solid border-gray-100 shadow-md flex relative rounded-lg flex-col items-center">
+                <div className="rounded-lg w-[224px] h-[123px]" style={{ backgroundColor: color }}>
+                  <div className="flex justify-end">
+                    <button
+                      className="absolute text-xs text-white p-2 bg-transparent rounded-lg"
+                      onClick={() => copyColor(color)}
+                    >
+                      <IconContext.Provider value={{ size: "2em" }}>
+                        <div>
+                          <IoMdCopy />
+                        </div>
+                      </IconContext.Provider>
+                    </button>
+                  </div>
+                </div>
+
+                <p className="pt-2 text-[#47474f] text-[14px]">{color}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-4 items-center justify-center mt-4">
+            <Button
+              variant="secondary"
+              onClick={generateRandomColors}
+            >
+              <IoIosShuffle />
+
+              Generate Random Colors
+            </Button>
+
+            <Button onClick={savePalette}>
+              <IoSaveOutline />
+
+              Save Palette
+            </Button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        {favoritePalettes.length > 0 && (
+          <div className="flex flex-wrap flex-col bg-white p-4 mt-8 rounded-lg">
+            <h2 className="text-2xl mb-4 font-semibold mb-4">Favorite Palettes</h2>
+
+            <div className="flex flex-col flex-wrap gap-4">
+              {favoritePalettes.map((palette, index) => (
+                <div key={index} className="flex flex-wrap gap-4 items-center">
+                  {palette.map((color) => (
+                    <div key={index} className="border border-solid w-[140px] h-[100px] p-2 border-gray-100 shadow-md flex relative rounded-lg flex-col items-center">
+                      <div className="rounded-lg w-[130px] h-[70px]" style={{ backgroundColor: color }} />
+
+                      <p className="pt-2 text-[#47474f] text-[14px]">{color}</p>
+                    </div>
+                  ))}
+
+                  <Button
+                    className="h-[100px] text-white font-bold px-4 rounded"
+                    variant="secondary"
+                    onClick={() => removePalette(palette)}
+                  >
+                    <IconContext.Provider value={{ color: "black" }}>
+                      <div>
+                        <IoTrashOutline />
+                      </div>
+                    </IconContext.Provider>
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
   );
-}
+};
+
+export default ColorPaletteGenerator;
